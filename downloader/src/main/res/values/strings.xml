@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Downloader</string>
+    <string name="action_pause_all">pause_all</string>
+    <string name="action_resume_all">resume_all</string>
+</resources>
