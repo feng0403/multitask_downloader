@@ -81,7 +81,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     private void startDownload() {
         if (mEntry.ifSupportRange) {
-            startMultiThreadDownload(mEntry.url, mEntry.totalLength);
+            startMultiThreadDownload();
             mEntry.status = DownloadEntry.DownloadStatus.downloading;
             notifyUpdate(DownloadSevice.MSG_NOTIFY_DOWNLOADING, mEntry);
         } else {
@@ -93,10 +93,10 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     }
 
-    private void startMultiThreadDownload(int totalLen) {
+    private void startMultiThreadDownload() {
         int startPos;
         int endPos;
-        int blockLen = totalLen / MAX_MULTI_DOWNLOAD_THREAD;
+        int blockLen = mEntry.totalLength / MAX_MULTI_DOWNLOAD_THREAD;
         if (mEntry.ranges == null) {
             mEntry.ranges = new HashMap<>();
             for (int i = 0; i < Constants.MAX_MULTI_DOWNLOAD_THREAD; i++) {
@@ -114,7 +114,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
             if (i < MAX_MULTI_DOWNLOAD_THREAD - 1) {
                 endPos = (i + 1) * blockLen - 1;
             } else {
-                endPos = totalLen;
+                endPos = mEntry.totalLength;
             }
             Log.d("DownloadTask", "index: " + i + " startPos:" + startPos + " endPos:" + endPos);
             if (startPos < endPos) {
