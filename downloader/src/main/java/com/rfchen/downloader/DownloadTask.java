@@ -53,7 +53,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     public void pause() {
         if (mDownloadThreads != null && mDownloadThreads.length > 0) {
             for (int i = 0; i < mDownloadThreads.length; i++) {
-                if (mDownloadThreads[i] != null && mDownloadThreads[i].isRunning()) {
+                if (mDownloadThreads[i] != null && threadStatus[i] == DownloadEntry.DownloadStatus.downloading) {
                     mDownloadThreads[i].pause();
                 }
             }
@@ -63,12 +63,11 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     public void cancel() {
         if (mDownloadThreads != null && mDownloadThreads.length > 0) {
             for (int i = 0; i < mDownloadThreads.length; i++) {
-                if (mDownloadThreads[i] != null && mDownloadThreads[i].isRunning()) {
+                if (mDownloadThreads[i] != null && threadStatus[i] == DownloadEntry.DownloadStatus.downloading) {
                     mDownloadThreads[i].cancel();
                 }
             }
         }
-
     }
 
     @Override
@@ -94,7 +93,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     }
 
-    private void startMultiThreadDownload(String url, int totalLen) {
+    private void startMultiThreadDownload(int totalLen) {
         int startPos;
         int endPos;
         int blockLen = totalLen / MAX_MULTI_DOWNLOAD_THREAD;
