@@ -1,9 +1,10 @@
 package com.rfchen.downloader;
 
 
-import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
@@ -18,8 +19,8 @@ public class DownloadThread implements Runnable {
     private final int startPos;
     private final int endPos;
     private final DownloadListener downloadListener;
-    private final String path;
     private final int index;
+    private final String fileName;
     private DownloadEntry.DownloadStatus mStatus;
 
 
@@ -29,8 +30,7 @@ public class DownloadThread implements Runnable {
         this.startPos = startPos;
         this.endPos = endPos;
         this.downloadListener = downloadListener;
-        this.path = Environment.getExternalStorageDirectory() + File.separator +
-                "feng0403" + File.separator + url.substring(url.lastIndexOf("/") + 1);
+        this.fileName = url.substring(url.lastIndexOf("/") + 1);
     }
 
     @Override
@@ -39,24 +39,29 @@ public class DownloadThread implements Runnable {
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
         RandomAccessFile raf = null;
+        FileOutputStream fos = null;
         try {
+
+
             URL url = new URL(urlStr);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setConnectTimeout(Constants.CONNCET_TIME_OUT);
             urlConnection.setReadTimeout(Constants.READ_TIME_OUT);
-            urlConnection.setRequestProperty("Range", "bytes=" + startPos + "-" + endPos);
-
-            File file = new File(path);
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
+            if (startPos != -1 && endPos != -1) {
+                urlConnection.setRequestProperty("Range", "bytes=" + startPos + "-" + endPos);
             }
-            raf = new RandomAccessFile(file, "rw");
-            raf.seek(startPos);
-            byte[] buffer = new byte[2048];
-            inputStream = urlConnection.getInputStream();
-            int len;
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL) {
+            File file = new File(Utility.getDownloadStorageDir("Downloader_feng0403"), fileName);
+
+            int responseCode = urlConnection.getResponseCode();
+            Log.d("DownloadThread", "responseCode: " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_PARTIAL) {
+                inputStream = urlConnection.getInputStream();
+
+                raf = new RandomAccessFile(file, "rw");
+                raf.seek(startPos);
+                byte[] buffer = new byte[2048];
+                int len;
                 while ((len = inputStream.read(buffer)) != -1) {
                     if (mStatus == DownloadEntry.DownloadStatus.pauesd
                             || mStatus == DownloadEntry.DownloadStatus.cancelled
@@ -72,6 +77,28 @@ public class DownloadThread implements Runnable {
                 if (inputStream != null) {
                     inputStream.close();
                 }
+            } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                fos = new FileOutputStream(file);
+                inputStream = urlConnection.getInputStream();
+                byte[] buffer = new byte[2048];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    if (mStatus == DownloadEntry.DownloadStatus.pauesd
+                            || mStatus == DownloadEntry.DownloadStatus.cancelled
+                            || mStatus == DownloadEntry.DownloadStatus.error) {
+                        break;
+                    }
+                    fos.write(buffer, 0, len);
+                    downloadListener.onProgressChanged(index, len);
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } else {
+                downloadListener.onDownloadError(index, responseCode + ":" + urlConnection.getResponseMessage());
             }
             if (mStatus == DownloadEntry.DownloadStatus.pauesd) {
                 downloadListener.onDownloadPaused(index);

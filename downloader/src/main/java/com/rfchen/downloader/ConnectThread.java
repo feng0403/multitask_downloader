@@ -26,12 +26,17 @@ public class ConnectThread implements Runnable {
             urlConnection.setRequestMethod("GET");
             urlConnection.setConnectTimeout(Constants.CONNCET_TIME_OUT);
             urlConnection.setReadTimeout(Constants.READ_TIME_OUT);
-            urlConnection.setRequestProperty("Range", "bytes=0-" + Integer.MAX_VALUE);
+            urlConnection.setInstanceFollowRedirects(false);
             int contentLength = urlConnection.getContentLength();
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL) {
-                connectListener.onConnect(true, contentLength);
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                if (urlConnection.getHeaderField("Accept-Ranges").equals("bytes")) {
+                    connectListener.onConnect(true, contentLength);
+                } else {
+                    connectListener.onConnect(false, contentLength);
+                }
             } else {
-                connectListener.onConnect(false, contentLength);
+                connectListener.onConnectError("network error " + responseCode);
             }
         } catch (java.io.IOException e) {
             e.printStackTrace();

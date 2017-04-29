@@ -1,6 +1,5 @@
 package com.rfchen.downloader;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -82,18 +81,27 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     private void startDownload() {
         if (mEntry.ifSupportRange) {
             startMultiThreadDownload();
-            mEntry.status = DownloadEntry.DownloadStatus.downloading;
-            notifyUpdate(DownloadSevice.MSG_NOTIFY_DOWNLOADING, mEntry);
         } else {
             startSingleThreadDownload();
         }
     }
 
     private void startSingleThreadDownload() {
+        mEntry.status = DownloadEntry.DownloadStatus.downloading;
+        notifyUpdate(DownloadSevice.MSG_NOTIFY_DOWNLOADING, mEntry);
+
+
+        mDownloadThreads = new DownloadThread[1];
+        mDownloadThreads[0] = new DownloadThread(-1, mEntry.url, -1, -1, this);
+        mExecutor.execute(mDownloadThreads[0]);
 
     }
 
     private void startMultiThreadDownload() {
+
+        mEntry.status = DownloadEntry.DownloadStatus.downloading;
+        notifyUpdate(DownloadSevice.MSG_NOTIFY_DOWNLOADING, mEntry);
+
         int startPos;
         int endPos;
         int blockLen = mEntry.totalLength / MAX_MULTI_DOWNLOAD_THREAD;
@@ -129,9 +137,10 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     @Override
     public synchronized void onProgressChanged(int index, int progress) {
-        int newRange = mEntry.ranges.get(index) + progress;
-        mEntry.ranges.put(index, newRange);
-
+        if (mEntry.ifSupportRange) {
+            int newRange = mEntry.ranges.get(index) + progress;
+            mEntry.ranges.put(index, newRange);
+        }
         mEntry.currentLength += progress;
 
         long currentTimeStamp = System.currentTimeMillis();
@@ -150,13 +159,20 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     @Override
     public synchronized void onDownloadError(int index, String message) {
         Log.d("DownloadTask", "thread " + index + " error: " + message);
-        threadStatus[index] = DownloadEntry.DownloadStatus.error;
-        for (int i = 0; i < threadStatus.length; i++) {
-            if (threadStatus[i] != DownloadEntry.DownloadStatus.error && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
-                mDownloadThreads[i].cancelByError();
-                return;
+        if (mEntry.ifSupportRange) {
+            threadStatus[index] = DownloadEntry.DownloadStatus.error;
+            for (int i = 0; i < threadStatus.length; i++) {
+                if (threadStatus[i] != DownloadEntry.DownloadStatus.error && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
+                    mDownloadThreads[i].cancelByError();
+                    return;
+                }
             }
         }
+
+        String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
+        File file = new File(Utility.getDownloadStorageDir("Downloader_feng0403"), fileName);
+        if (file.exists())
+            file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.error;
         notifyUpdate(DownloadSevice.MSG_NOTIFY_ERROR, mEntry);
     }
@@ -164,18 +180,23 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     @Override
     public synchronized void onConnectError(String message) {
-
+        mEntry.status = DownloadEntry.DownloadStatus.error;
+        notifyUpdate(DownloadSevice.MSG_NOTIFY_ERROR, mEntry);
     }
+
 
     @Override
     public synchronized void onDownloadPaused(int index) {
         Log.d("DownloadTask", "thread " + index + " paused");
-        threadStatus[index] = DownloadEntry.DownloadStatus.pauesd;
-        for (int i = 0; i < threadStatus.length; i++) {
-            if (threadStatus[i] != DownloadEntry.DownloadStatus.pauesd && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
-                return;
+        if (mEntry.ifSupportRange) {
+            threadStatus[index] = DownloadEntry.DownloadStatus.pauesd;
+            for (int i = 0; i < threadStatus.length; i++) {
+                if (threadStatus[i] != DownloadEntry.DownloadStatus.pauesd && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
+                    return;
+                }
             }
         }
+
         mEntry.status = DownloadEntry.DownloadStatus.pauesd;
         notifyUpdate(DownloadSevice.MSG_NOTIFY_PAUSED, mEntry);
     }
@@ -183,18 +204,19 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     @Override
     public synchronized void onDownloadCancel(int index) {
         Log.d("DownloadTask", "thread " + index + " paused");
-        threadStatus[index] = DownloadEntry.DownloadStatus.cancelled;
-        for (int i = 0; i < threadStatus.length; i++) {
-            if (threadStatus[i] != DownloadEntry.DownloadStatus.cancelled && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
-                return;
+        if (mEntry.ifSupportRange) {
+            threadStatus[index] = DownloadEntry.DownloadStatus.cancelled;
+            for (int i = 0; i < threadStatus.length; i++) {
+                if (threadStatus[i] != DownloadEntry.DownloadStatus.cancelled && threadStatus[i] != DownloadEntry.DownloadStatus.completed) {
+                    return;
+                }
             }
         }
 
         //delete file;
         mEntry.reset();
-        String path = Environment.getExternalStorageDirectory() + File.separator +
-                "feng0403" + File.separator + mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
-        File file = new File(path);
+        String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
+        File file = new File(Utility.getDownloadStorageDir("Downloader_feng0403"), fileName);
         if (file.exists())
             file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.cancelled;
@@ -204,6 +226,8 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     @Override
     public synchronized void onDownloadCompleted(int index) {
         Log.d("DownloadTask", "thread " + index + " complete");
-        threadStatus[index] = DownloadEntry.DownloadStatus.completed;
+        if (mEntry.ifSupportRange) {
+            threadStatus[index] = DownloadEntry.DownloadStatus.completed;
+        }
     }
 }

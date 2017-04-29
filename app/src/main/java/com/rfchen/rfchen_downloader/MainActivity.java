@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 //                    downloadEntry = new DownloadEntry("1", "no.1", "http://wdj-qn-apk.wdjcdn.com/c/32/97f952b79b96a8c791ecbf06e05e732c.apk");
 //                    downloadEntry = new DownloadEntry("1", "no.1", "http://www.wandoujia.com/apps/com.UCMobile/download");
 //                    downloadEntry = new DownloadEntry("1", "no.1", "http://images.cnitblog.com/blog/288799/201409/061046391107893.jpg");
-                    downloadEntry = new DownloadEntry("1", "no.1", "http://shouji.360tpcdn.com/150723/de6fd89a346e304f66535b6d97907563/com.sina.weibo_2057.apk");
+//                    downloadEntry = new DownloadEntry("1", "no.1", "http://shouji.360tpcdn.com/150723/de6fd89a346e304f66535b6d97907563/com.sina.weibo_2057.apk");
+                    downloadEntry = new DownloadEntry("1", "no.1", "http://shouji.360tpcdn.com/170428/92c0ba2f0aeba67693c0239d8cc18df0/com.snda.wifilocating_3115.apk");
                 }
                 mDownloadManager.add(downloadEntry);
             }
