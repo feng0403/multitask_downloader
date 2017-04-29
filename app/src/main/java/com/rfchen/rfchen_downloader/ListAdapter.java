@@ -1,19 +1,17 @@
 package com.rfchen.rfchen_downloader;
 
 import android.content.Context;
-import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.rfchen.downloader.DownloadEntry;
+import com.rfchen.downloader.entity.DownloadEntry;
 import com.rfchen.downloader.DownloadManager;
 
 import java.util.List;

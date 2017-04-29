@@ -1,4 +1,6 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.core;
+
+import com.rfchen.downloader.Utilties.Constants;
 
 import java.net.HttpURLConnection;
 import java.net.URL;

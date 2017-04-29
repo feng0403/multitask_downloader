@@ -1,16 +1,14 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.notify;
 
 import android.content.Context;
 
 import com.rfchen.downloader.db.DBController;
+import com.rfchen.downloader.entity.DownloadEntry;
 
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by feng on 17/3/31.

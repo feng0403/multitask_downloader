@@ -1,4 +1,4 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.Utilties;
 
 /**
  * Created by feng on 17/3/31.

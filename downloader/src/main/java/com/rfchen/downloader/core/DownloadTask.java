@@ -1,14 +1,18 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.core;
 
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.rfchen.downloader.Utilties.Constants;
+import com.rfchen.downloader.Utilties.FileUtility;
+import com.rfchen.downloader.entity.DownloadEntry;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 
-import static com.rfchen.downloader.Constants.MAX_MULTI_DOWNLOAD_THREAD;
+import static com.rfchen.downloader.Utilties.Constants.MAX_MULTI_DOWNLOAD_THREAD;
 
 /**
  * Created by feng on 17/3/31.
@@ -170,7 +174,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
         }
 
         String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
-        File file = new File(Utility.getDownloadStorageDir("Downloader_feng0403"), fileName);
+        File file = new File(FileUtility.getDownloadStorageDir("Downloader_feng0403"), fileName);
         if (file.exists())
             file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.error;
@@ -216,7 +220,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
         //delete file;
         mEntry.reset();
         String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
-        File file = new File(Utility.getDownloadStorageDir("Downloader_feng0403"), fileName);
+        File file = new File(FileUtility.getDownloadStorageDir("Downloader_feng0403"), fileName);
         if (file.exists())
             file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.cancelled;

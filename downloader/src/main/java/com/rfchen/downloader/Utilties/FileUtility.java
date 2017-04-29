@@ -1,4 +1,4 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.Utilties;
 
 import android.os.Environment;
 import android.util.Log;
@@ -11,8 +11,8 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
  * Created by feng on 2017/4/29.
  */
 
-public class Utility {
-    private static final String LOG_TAG = "Utility";
+public class FileUtility {
+    private static final String LOG_TAG = "FileUtility";
 
     public static File getDownloadStorageDir(String downloadName) {
         // Get the directory for the user's public pictures directory.

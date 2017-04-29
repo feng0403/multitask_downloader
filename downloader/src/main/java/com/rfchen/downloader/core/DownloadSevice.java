@@ -1,4 +1,4 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.core;
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,7 +8,10 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.rfchen.downloader.Utilties.Constants;
 import com.rfchen.downloader.db.DBController;
+import com.rfchen.downloader.entity.DownloadEntry;
+import com.rfchen.downloader.notify.DataChanger;
 
 import java.util.ArrayList;
 import java.util.HashMap;

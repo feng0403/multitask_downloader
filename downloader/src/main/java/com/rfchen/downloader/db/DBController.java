@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
-import com.rfchen.downloader.DownloadEntry;
+import com.rfchen.downloader.entity.DownloadEntry;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -1,4 +1,6 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.notify;
+
+import com.rfchen.downloader.entity.DownloadEntry;
 
 import java.util.Observable;
 import java.util.Observer;

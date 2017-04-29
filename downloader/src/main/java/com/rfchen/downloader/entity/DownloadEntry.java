@@ -1,4 +1,4 @@
-package com.rfchen.downloader;
+package com.rfchen.downloader.entity;
 
 
 import com.j256.ormlite.field.DataType;

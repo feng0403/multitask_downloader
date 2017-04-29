@@ -5,8 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.rfchen.downloader.DataWatcher;
-import com.rfchen.downloader.DownloadEntry;
+import com.rfchen.downloader.notify.DataWatcher;
+import com.rfchen.downloader.entity.DownloadEntry;
 import com.rfchen.downloader.DownloadManager;
 
 public class MainActivity extends AppCompatActivity {

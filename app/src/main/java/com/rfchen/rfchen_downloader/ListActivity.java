@@ -8,12 +8,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import com.rfchen.downloader.DataWatcher;
-import com.rfchen.downloader.DownloadEntry;
+import com.rfchen.downloader.notify.DataWatcher;
+import com.rfchen.downloader.entity.DownloadEntry;
 import com.rfchen.downloader.DownloadManager;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 public class ListActivity extends AppCompatActivity {
