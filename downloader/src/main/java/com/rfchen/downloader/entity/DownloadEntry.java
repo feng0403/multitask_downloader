@@ -61,9 +61,9 @@ public class DownloadEntry implements Serializable, Cloneable {
     @Override
     public String toString() {
         return "DownloadEntry{" +
-                ",id=" + id +
-                ", status=" + status +
+                " status=" + status +
                 ", " + currentLength + "/" + totalLength +
+                ",id=" + id +
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
                 '}';

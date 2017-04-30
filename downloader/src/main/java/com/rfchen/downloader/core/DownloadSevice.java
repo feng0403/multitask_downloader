@@ -49,11 +49,9 @@ public class DownloadSevice extends Service {
             switch (msg.what) {
                 case MSG_NOTIFY_PAUSED:
                 case MSG_NOTIFY_CANCELLED:
-                    checkNext();
-                    break;
                 case MSG_NOTIFY_COMPLETED:
-                    mDownloadingTasks.remove(entry.id);
-                    checkNext();
+                case MSG_NOTIFY_ERROR:
+                    checkNext(entry);
                     break;
             }
             mDataChanger.postStatus(entry);
@@ -65,11 +63,12 @@ public class DownloadSevice extends Service {
     /**
      * 等待队列中取 task 取下载
      */
-    private void checkNext() {
-        DownloadEntry entry = mWaitingQueue.poll();
+    private void checkNext(DownloadEntry entry) {
+        mDownloadingTasks.remove(entry.id);
+        DownloadEntry polledEntry = mWaitingQueue.poll();
 
-        if (entry != null) {
-            startDownload(entry);
+        if (polledEntry != null) {
+            startDownload(polledEntry);
         }
     }
 
@@ -86,9 +85,11 @@ public class DownloadSevice extends Service {
         mDataChanger = DataChanger.getInstance(getApplicationContext());
         mDBController = DBController.getInstance(getApplicationContext());
         ArrayList<DownloadEntry> entryArrayList = mDBController.queryAll();
+        //从数据库中恢复数据
         if (entryArrayList != null) {
             Log.d("DownloadSevice", "entryArrayList:" + entryArrayList);
             for (DownloadEntry downloadEntry : entryArrayList) {
+
                 if (downloadEntry.status == DownloadEntry.DownloadStatus.downloading
                         || downloadEntry.status == DownloadEntry.DownloadStatus.waiting) {
 //                    downloadEntry.status = DownloadEntry.DownloadStatus.pauesd;
@@ -99,7 +100,6 @@ public class DownloadSevice extends Service {
                 mDataChanger.addToOperatedEntryMap(downloadEntry);
             }
         }
-
     }
 
     @Override

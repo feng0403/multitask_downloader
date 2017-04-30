@@ -1,25 +1,33 @@
 package com.rfchen.rfchen_downloader;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import com.rfchen.downloader.notify.DataWatcher;
-import com.rfchen.downloader.entity.DownloadEntry;
 import com.rfchen.downloader.DownloadManager;
+import com.rfchen.downloader.entity.DownloadEntry;
+import com.rfchen.downloader.notify.DataWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class ListActivity extends AppCompatActivity {
 
     private ListView mListView;
     private ListAdapter adapter;
     private List<DownloadEntry> mDataList;
+    private List<AppEntry> mAppEntryList;
 
     private DataWatcher mDataWatcher = new DataWatcher() {
         @Override
@@ -27,6 +35,7 @@ public class ListActivity extends AppCompatActivity {
             //update UI
             //需要重写hashCode和equals方法
             int index = mDataList.indexOf(entry);
+            Log.d("ListActivity", "entry:" + entry);
 
             if (index != -1) {
                 mDataList.remove(index);
@@ -42,10 +51,11 @@ public class ListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list);
 
         mListView = (ListView) findViewById(R.id.listView);
-        mDataList = generateDownloadEntries();
+        mDataList = new ArrayList<>();
         adapter = new ListAdapter(this, R.layout.activity_list_item, mDataList);
 
 
+        /*
         //退出 activity 再进来 恢复数据
         //否则重新执行了一遍generateDownloadEntries，导致数据是乱的
         for (int i = 0; i < mDataList.size(); i++) {
@@ -55,11 +65,50 @@ public class ListActivity extends AppCompatActivity {
                 mDataList.add(i, latestDownloadEntry);
             }
         }
+        mListView.setAdapter(adapter);*/
 
 
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://api.stay4it.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
 
-        mListView.setAdapter(adapter);
+        AppService service = retrofit.create(AppService.class);
 
+        service.getAppList()
+                .map(new Func1<HttpResult<List<AppEntry>>, List<AppEntry>>() {
+                    @Override
+                    public List<AppEntry> call(HttpResult<List<AppEntry>> httpResult) {
+                        if (httpResult.getRet() != 200) {
+
+                        }
+                        return httpResult.getData();
+                    }
+                }).subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<AppEntry>>() {
+                    @Override
+                    public void call(List<AppEntry> appEntries) {
+                        Log.d("ListActivity", appEntries.toString());
+                        mAppEntryList = appEntries;
+                        for (AppEntry appEntry : mAppEntryList) {
+                            mDataList.add(appEntry.generateDownloadEntry());
+                        }
+                        //退出 activity 再进来 恢复数据
+                        //否则重新执行了一遍generateDownloadEntries，导致数据是乱的
+                        for (int i = 0; i < mDataList.size(); i++) {
+                            DownloadEntry latestDownloadEntry = DownloadManager.getInstance(ListActivity.this).queryLatestDownloadEntry(mDataList.get(i).id);
+                            if (latestDownloadEntry != null) {
+                                mDataList.remove(i);
+                                mDataList.add(i, latestDownloadEntry);
+                            }
+                        }
+                        adapter = new ListAdapter(ListActivity.this, R.layout.activity_list_item, mDataList);
+                        mListView.setAdapter(adapter);
+                    }
+                });
     }
 
     @Override
@@ -104,41 +153,5 @@ public class ListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @NonNull
-    private List<DownloadEntry> generateDownloadEntries() {
-        List<DownloadEntry> dataList = new ArrayList<>();
-        DownloadEntry downloadEntry1 = new DownloadEntry("1", "NO.1", "www,url.com");
-        DownloadEntry downloadEntry2 = new DownloadEntry("2", "NO.2", "www,url.com");
-        DownloadEntry downloadEntry3 = new DownloadEntry("3", "NO.3", "www,url.com");
-        DownloadEntry downloadEntry4 = new DownloadEntry("4", "NO.4", "www,url.com");
-        DownloadEntry downloadEntry5 = new DownloadEntry("5", "NO.5", "www,url.com");
-        DownloadEntry downloadEntry11 = new DownloadEntry("11", "NO.11", "www,url.com");
-        DownloadEntry downloadEntry22 = new DownloadEntry("22", "NO.22", "www,url.com");
-        DownloadEntry downloadEntry33 = new DownloadEntry("33", "NO.33", "www,url.com");
-        DownloadEntry downloadEntry44 = new DownloadEntry("44", "NO.44", "www,url.com");
-        DownloadEntry downloadEntry55 = new DownloadEntry("55", "NO.55", "www,url.com");
-        DownloadEntry downloadEntry111 = new DownloadEntry("111", "NO.111", "www,url.com");
-        DownloadEntry downloadEntry222 = new DownloadEntry("222", "NO.222", "www,url.com");
-        DownloadEntry downloadEntry333 = new DownloadEntry("333", "NO.333", "www,url.com");
-        DownloadEntry downloadEntry444 = new DownloadEntry("444", "NO.444", "www,url.com");
-        DownloadEntry downloadEntry555 = new DownloadEntry("555", "NO.555", "www,url.com");
-        dataList.add(downloadEntry1);
-        dataList.add(downloadEntry2);
-        dataList.add(downloadEntry3);
-        dataList.add(downloadEntry4);
-        dataList.add(downloadEntry5);
-        dataList.add(downloadEntry11);
-        dataList.add(downloadEntry22);
-        dataList.add(downloadEntry33);
-        dataList.add(downloadEntry44);
-        dataList.add(downloadEntry55);
-        dataList.add(downloadEntry111);
-        dataList.add(downloadEntry222);
-        dataList.add(downloadEntry333);
-        dataList.add(downloadEntry444);
-        dataList.add(downloadEntry555);
-        return dataList;
     }
 }

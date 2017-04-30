@@ -54,6 +54,8 @@ public class ListAdapter extends ArrayAdapter<DownloadEntry> {
 
         viewHolder.textView.setText(downloadEntry.toString());
         viewHolder.button.setText(downloadEntry.status.name());
+
+
         viewHolder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
