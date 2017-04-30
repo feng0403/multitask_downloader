@@ -4,15 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.rfchen.downloader.Utilties.Constants;
-import com.rfchen.downloader.Utilties.FileUtility;
+import com.rfchen.downloader.DownloadConfig;
 import com.rfchen.downloader.entity.DownloadEntry;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
-
-import static com.rfchen.downloader.Utilties.Constants.MAX_MULTI_DOWNLOAD_THREAD;
 
 /**
  * Created by feng on 17/3/31.
@@ -22,6 +18,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
     private final DownloadEntry mEntry;
     private final Handler mHandler;
     private final ExecutorService mExecutor;
+    private final int max_download_threads;
     private Message message;
     private ConnectThread connectThread;
     private DownloadThread[] mDownloadThreads;
@@ -33,6 +30,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
         this.mEntry = entry;
         this.mHandler = handler;
         this.mExecutor = executor;
+        max_download_threads = DownloadConfig.getInstance().getMax_download_threads();
     }
 
     public void start() {
@@ -108,22 +106,22 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
         int startPos;
         int endPos;
-        int blockLen = mEntry.totalLength / MAX_MULTI_DOWNLOAD_THREAD;
+        int blockLen = mEntry.totalLength / max_download_threads;
         if (mEntry.ranges == null) {
             mEntry.ranges = new HashMap<>();
-            for (int i = 0; i < Constants.MAX_MULTI_DOWNLOAD_THREAD; i++) {
+            for (int i = 0; i < max_download_threads; i++) {
                 mEntry.ranges.put(i, 0);
             }
         }
 
         if (threadStatus == null) {
-            threadStatus = new DownloadEntry.DownloadStatus[MAX_MULTI_DOWNLOAD_THREAD];
+            threadStatus = new DownloadEntry.DownloadStatus[max_download_threads];
         }
 
-        mDownloadThreads = new DownloadThread[MAX_MULTI_DOWNLOAD_THREAD];
-        for (int i = 0; i < MAX_MULTI_DOWNLOAD_THREAD; i++) {
+        mDownloadThreads = new DownloadThread[max_download_threads];
+        for (int i = 0; i < max_download_threads; i++) {
             startPos = i * blockLen + mEntry.ranges.get(i);
-            if (i < MAX_MULTI_DOWNLOAD_THREAD - 1) {
+            if (i < max_download_threads - 1) {
                 endPos = (i + 1) * blockLen - 1;
             } else {
                 endPos = mEntry.totalLength;
@@ -173,10 +171,6 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
             }
         }
 
-        String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
-        File file = new File(FileUtility.getDownloadStorageDir("Downloader_feng0403"), fileName);
-        if (file.exists())
-            file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.error;
         notifyUpdate(DownloadSevice.MSG_NOTIFY_ERROR, mEntry);
     }
@@ -219,10 +213,6 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
         //delete file;
         mEntry.reset();
-        String fileName = mEntry.url.substring(mEntry.url.lastIndexOf("/") + 1);
-        File file = new File(FileUtility.getDownloadStorageDir("Downloader_feng0403"), fileName);
-        if (file.exists())
-            file.delete();
         mEntry.status = DownloadEntry.DownloadStatus.cancelled;
         notifyUpdate(DownloadSevice.MSG_NOTIFY_CANCELLED, mEntry);
     }

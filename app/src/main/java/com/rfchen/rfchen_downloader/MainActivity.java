@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.rfchen.downloader.DownloadConfig;
 import com.rfchen.downloader.notify.DataWatcher;
 import com.rfchen.downloader.entity.DownloadEntry;
 import com.rfchen.downloader.DownloadManager;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mDownloadManager = DownloadManager.getInstance(this);
+        DownloadConfig.getInstance().setMax_download_threads(3);
 
         findViewById(R.id.button_start).setOnClickListener(new View.OnClickListener() {
             @Override

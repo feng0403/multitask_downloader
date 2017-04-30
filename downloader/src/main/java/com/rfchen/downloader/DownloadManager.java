@@ -15,7 +15,6 @@ import com.rfchen.downloader.notify.DataWatcher;
 
 public class DownloadManager {
 
-    private static final long MIN_OPERATE_INTERVAL = 1 * 500;
     private volatile static DownloadManager INSTANCE;
     private final Context context;
     private final DataChanger dataChanger;
@@ -116,7 +115,7 @@ public class DownloadManager {
 
     private boolean checkIfOperate() {
         long currentTimeStamp = System.currentTimeMillis();
-        if (currentTimeStamp - lastStamp > MIN_OPERATE_INTERVAL) {
+        if (currentTimeStamp - lastStamp > DownloadConfig.getInstance().getMin_operate_interval()) {
             lastStamp = currentTimeStamp;
             return true;
         }

@@ -8,6 +8,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.rfchen.downloader.DownloadConfig;
 import com.rfchen.downloader.Utilties.Constants;
 import com.rfchen.downloader.db.DBController;
 import com.rfchen.downloader.entity.DownloadEntry;
@@ -188,7 +189,6 @@ public class DownloadSevice extends Service {
     private void startDownload(DownloadEntry entry) {
         DownloadTask task = new DownloadTask(mHandler, entry, mExecutor);
         mDownloadingTasks.put(entry.id, task);
-//        mExecutor.execute(task);
         task.start();
     }
 
@@ -198,7 +198,7 @@ public class DownloadSevice extends Service {
      * @param entry
      */
     private void addDownload(DownloadEntry entry) {
-        if (mDownloadingTasks.size() >= Constants.MAX_DOWNLOAD_NUM) {
+        if (mDownloadingTasks.size() >= DownloadConfig.getInstance().getMax_download_tasks()) {
             mWaitingQueue.offer(entry);
             entry.status = DownloadEntry.DownloadStatus.waiting;
             mDataChanger.postStatus(entry);

@@ -3,8 +3,8 @@ package com.rfchen.downloader.core;
 
 import android.util.Log;
 
+import com.rfchen.downloader.DownloadConfig;
 import com.rfchen.downloader.Utilties.Constants;
-import com.rfchen.downloader.Utilties.FileUtility;
 import com.rfchen.downloader.entity.DownloadEntry;
 
 import java.io.File;
@@ -55,7 +55,7 @@ public class DownloadThread implements Runnable {
             if (startPos != -1 && endPos != -1) {
                 urlConnection.setRequestProperty("Range", "bytes=" + startPos + "-" + endPos);
             }
-            File file = new File(FileUtility.getDownloadStorageDir("Downloader_feng0403"), fileName);
+            File file = DownloadConfig.getInstance().getDownloadFile(urlStr);
 
             int responseCode = urlConnection.getResponseCode();
             Log.d("DownloadThread", "responseCode: " + responseCode);

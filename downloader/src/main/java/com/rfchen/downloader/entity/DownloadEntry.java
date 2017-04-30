@@ -4,7 +4,9 @@ package com.rfchen.downloader.entity;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.rfchen.downloader.DownloadConfig;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -46,6 +48,10 @@ public class DownloadEntry implements Serializable, Cloneable {
         totalLength = 0;
         currentLength = 0;
         status = DownloadStatus.idle;
+        File file = DownloadConfig.getInstance().getDownloadFile(url);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     public enum DownloadStatus {
